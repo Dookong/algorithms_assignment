@@ -3,4 +3,4 @@ project(algorithms_assignment)
 
 set(CMAKE_CXX_STANDARD 98)
 
-add_executable(algorithms_assignment increasing_subsequence.cpp merge_slides.cpp)
+add_executable(algorithms_assignment merge_slides.cpp)

@@ -1,17 +1,16 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
-#include <algorithm>
-
+#include <climits>
 
 using namespace std;
 
-vector<string> tokenize(const string& data, const char delimiter = ' ') {
+vector<string> tokenize(const string& data) {
     vector<string> result;
     string token;
     stringstream ss(data);
 
-    while (getline(ss, token, delimiter)) {
+    while (ss >> token) {
         result.push_back(token);
     }
     return result;
@@ -22,42 +21,49 @@ int str2int (const string &str) {
     int num;
     if((ss >> num).fail())
     {
-        return 0;
+        return -1;
     }
     return num;
 }
 
-int add(int cost[], int i, int j) {
-    if(i==0) return cost[j];
-    else return cost[j] - cost[i-1];
-}
+int merge_slides(const vector<int>& cost){
+    int N = cost.size()-1;
+    if(N == 1)
+        return 0;
 
+    vector<int> sum(N+1, 0);
+    vector< vector<int> > dp(N+1, vector<int>(N+1,0));
+    vector< vector<int> > num(N+1, vector<int>(N+1,0));
 
-int mergeSlides(const vector<int>& cost){
-    int size = cost.size();
-    int sum[size];
-    vector< vector<int> > dp;
+    for(int i=1; i<=N; i++)
+        sum[i] = sum[i-1] + cost[i];
 
-    //Calculate sum
-    sum[0] = cost[0];
-    for(int i = 1; i < size; i++) sum[i] += sum[i-1] + cost[i];
-    //Init
-    for(int i = 0; i < size-1; i++) dp[i][i+1] = cost[i] + cost[i+1];
+    for (int i=1; i <= N; i++)
+        sum[i] = sum[i-1] + cost[i];
 
-    for(int gap = 2; gap < size; gap++){	//i와 j간 gap 3칸부터
-        for(int i = 0; i+gap < size; i++){	//i인덱스
-            int j = i+gap;	//j인덱스
-            dp[i][j] = INT_MAX;	//MIN을 구하기 위해
+    for (int i=1; i <= N; i++)
+        num[i-1][i] = i;
 
-            for(int k = i; k < j; k++)	//i~j 사이의 k값
-                dp[i][j] = min(dp[i][k] + dp[k+1][j] + add(sum, i, j), dp[i][j]);
+    for (int d=2; d <= N; d++) {
+        for (int i=0; i+d <= N; i++) {
+            int j = i + d;
+            dp[i][j] = INT_MAX;
+
+            for (int k = num[i][j-1]; k <= num[i+1][j]; k++) {
+                int minimum = dp[i][k] + dp[k][j] + sum[j] - sum[i];
+                if (dp[i][j] > minimum){
+                    dp[i][j] = minimum;
+                    num[i][j] = k;
+                }
+            }
         }
     }
-    return dp[0][cost.size()-1];
+    return dp[0][N];
 }
 
-int main(){
+int main() {
     string input;
+
     while(true){
         getline(cin, input);
         if(input.empty())
@@ -65,25 +71,20 @@ int main(){
 
         vector<string> tokens = tokenize(input);
         vector<int> values;
-        vector<int> sum;
         bool error = false;
 
         for(int i =0; i< tokens.size(); i++)
-            if(str2int(tokens[i]) == 0) error = true;
+            if(str2int(tokens[i]) == -1) error = true;
 
         if(error) {
-            printf("Invalid Input\n");
+            cout << "Invalid Input\n";
             continue;
         }
 
-        //values.push_back(0);
+        values.push_back(0);
         for(int i =0; i< tokens.size(); i++)
             values.push_back(str2int(tokens[i]));
 
-        /*for(int i =0; i< tokens.size(); i++)
-            printf("%d ",values[i]);*/
-
-        printf("%d\n", mergeSlides(values));
+        cout << merge_slides(values) << endl;
     }
 }
-

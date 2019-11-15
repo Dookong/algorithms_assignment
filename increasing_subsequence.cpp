@@ -22,6 +22,7 @@ string ics(const string& input){
     int saved[length];
     int k = 0;
 
+
     int max = 0;
     dp[0] = 1;
 
@@ -52,7 +53,6 @@ string ics(const string& input){
     return result;
 }
 
-/*
 int main(){
     string input;
     while(true){
@@ -65,4 +65,4 @@ int main(){
 
         cout << ics(input) << endl;
     }
-}*/
+}
